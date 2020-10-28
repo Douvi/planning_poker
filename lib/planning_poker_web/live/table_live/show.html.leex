@@ -1,0 +1,22 @@
+<h1>Show Table</h1>
+
+<%= if @live_action in [:edit] do %>
+  <%= live_modal @socket, PlanningPokerWeb.TableLive.FormComponent,
+    id: @table.id,
+    title: @page_title,
+    action: @live_action,
+    table: @table,
+    return_to: Routes.table_show_path(@socket, :show, @table) %>
+<% end %>
+
+<ul>
+
+  <li>
+    <strong>Table name:</strong>
+    <%= @table.table_name %>
+  </li>
+
+</ul>
+
+<span><%= live_patch "Edit", to: Routes.table_show_path(@socket, :edit, @table), class: "button" %></span>
+<span><%= live_redirect "Back", to: Routes.table_index_path(@socket, :index) %></span>

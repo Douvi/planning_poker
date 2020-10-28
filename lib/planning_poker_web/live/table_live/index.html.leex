@@ -1,0 +1,35 @@
+<h1>Listing Tables</h1>
+
+<%= if @live_action in [:new, :edit] do %>
+  <%= live_modal @socket, PlanningPokerWeb.TableLive.FormComponent,
+    id: @table.id || :new,
+    title: @page_title,
+    action: @live_action,
+    table: @table,
+    return_to: Routes.table_index_path(@socket, :index) %>
+<% end %>
+
+<table>
+  <thead>
+    <tr>
+      <th>Table name</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="tables">
+    <%= for table <- @tables do %>
+      <tr id="table-<%= table.id %>">
+        <td><%= table.table_name %></td>
+
+        <td>
+          <span><%= live_redirect "Show", to: Routes.table_show_path(@socket, :show, table) %></span>
+          <span><%= live_patch "Edit", to: Routes.table_index_path(@socket, :edit, table) %></span>
+          <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: table.id, data: [confirm: "Are you sure?"] %></span>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<span><%= live_patch "New Table", to: Routes.table_index_path(@socket, :new) %></span>
