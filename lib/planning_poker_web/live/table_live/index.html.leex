@@ -23,9 +23,9 @@
         <td><%= table.table_name %></td>
 
         <td>
-          <span><%= live_redirect "Show", to: Routes.table_show_path(@socket, :show, table) %></span>
-          <span><%= live_patch "Edit", to: Routes.table_index_path(@socket, :edit, table) %></span>
-          <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: table.id, data: [confirm: "Are you sure?"] %></span>
+          <span><%= live_redirect "Show", to: Routes.table_show_path(@socket, :show, table)%> </span>
+          <%# <span><%= live_patch "Edit", to: Routes.table_index_path(@socket, :edit, table) </span> %>
+          <%# <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: table.id, data: [confirm: "Are you sure?"] </span> %>
         </td>
       </tr>
     <% end %>

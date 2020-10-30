@@ -1,22 +1,72 @@
-<h1>Show Table</h1>
+<table>
+  <thead>
+    <tr>
+      <th><h1> Poker Planing: <%= @table.table_name %> </h1></th>
+      <td style="text-align:right">
+          <div style="text-align:right"> <span><%= live_patch "Edit", to: Routes.table_show_path(@socket, :edit, @table) %></span> </div>
+      </td>
+    </tr>
+  </thead>
+</table>
 
-<%= if @live_action in [:edit] do %>
+<%= if @live_action in [:edit, :join] do %>
   <%= live_modal @socket, PlanningPokerWeb.TableLive.FormComponent,
     id: @table.id,
     title: @page_title,
     action: @live_action,
     table: @table,
+    user_key: @user_key,
     return_to: Routes.table_show_path(@socket, :show, @table) %>
 <% end %>
 
-<ul>
 
-  <li>
-    <strong>Table name:</strong>
-    <%= @table.table_name %>
-  </li>
+<%= if PlanningPokerWeb.TableLive.Show.is_not_join! %{"id" => @table.id, "user_key" => @user_key} do %>
+  <%= live_modal @socket, PlanningPokerWeb.TableLive.FormComponent,
+    id: @table.id,
+    title: @page_title,
+    action: :join,
+    table: @table,
+    user_key: @user_key,
+    return_to: Routes.table_show_path(@socket, :show, @table) %>
+<% end %>
 
+<table>
+  <thead>
+    <tr>
+      <th>Users</th>
+      <td style="text-align:right">
+          <%= if @table.show_vote === false do %>
+            <span><%= link "Show Vote", to: Routes.table_show_path(@socket, :show, @table), phx_click: "show_vote", phx_value_id: @table.id, class: "button" %> </span>
+          <% end %>
+          <span><%= link "Reset Vote", to: Routes.table_show_path(@socket, :show, @table), phx_click: "reset_vote", phx_value_id: @table.id %></span>
+        </td>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="users">
+    <%= for user <- @table.users do %>
+      <tr id="user-<%= user.id %>">
+        <td><%= user.user_name %></td>
+        <td style="text-align:right">
+          <%= cond do %>
+          <% @table.show_vote and user.vote === nil -> %>
+            vote: N/A
+          <% @table.show_vote -> %>
+            vote: <%= user.vote %>
+          <% user.vote === nil -> %>
+            vote: ?
+          <% true -> %>
+            vote: -
+          <% end %>
+        </td>
+
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<ul id="menu">
+  <%= for x <- [0,1,2,3,5,8,13,21] do %>
+  <li><%= link x, to: Routes.table_show_path(@socket, :show, @table), phx_click: "apply_vote", phx_value_id: @table.id, class: "button" %></li>
+  <% end %>
 </ul>
-
-<span><%= live_patch "Edit", to: Routes.table_show_path(@socket, :edit, @table), class: "button" %></span>
-<span><%= live_redirect "Back", to: Routes.table_index_path(@socket, :index) %></span>

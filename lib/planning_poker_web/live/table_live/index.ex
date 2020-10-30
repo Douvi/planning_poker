@@ -1,3 +1,5 @@
+require Logger
+
 defmodule PlanningPokerWeb.TableLive.Index do
   use PlanningPokerWeb, :live_view
 
@@ -5,8 +7,10 @@ defmodule PlanningPokerWeb.TableLive.Index do
   alias PlanningPoker.Planning.Table
 
   @impl true
-  def mount(_params, _session, socket) do
-    {:ok, assign(socket, :tables, list_tables())}
+  def mount(_params, %{"_csrf_token" => key}, socket) do
+    {:ok, socket
+      |> assign(:user_key, key)
+      |> assign(:tables, list_tables())}
   end
 
   @impl true

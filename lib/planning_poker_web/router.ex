@@ -14,6 +14,11 @@ defmodule PlanningPokerWeb.Router do
     plug :accepts, ["json"]
   end
 
+  # TOKEN
+  # https://toranbillups.com/blog/archive/2020/06/26/cookie-authentication-with-phoenix-liveview/
+  # https://elixir-lang.org/getting-started/mix-otp/ets.html
+  # https://github.com/toranb/cookie-authentication-phoenix-liveview-example/commit/863e3c3b7cf4f2a0230c4f036d8a10183adcdc5b
+
   scope "/", PlanningPokerWeb do
     pipe_through :browser
 
@@ -24,6 +29,7 @@ defmodule PlanningPokerWeb.Router do
     live "/tables/:id/edit", TableLive.Index, :edit
 
     live "/tables/:id", TableLive.Show, :show
+    live "/tables/:id/join", TableLive.Show, :join
     live "/tables/:id/show/edit", TableLive.Show, :edit
   end
 

@@ -1,3 +1,5 @@
+require Logger
+
 defmodule PlanningPoker.Planning do
   @moduledoc """
   The Planning context.
@@ -7,6 +9,7 @@ defmodule PlanningPoker.Planning do
   alias PlanningPoker.Repo
 
   alias PlanningPoker.Planning.Table
+  alias PlanningPoker.Planning.User
 
   @doc """
   Returns the list of tables.
@@ -35,7 +38,12 @@ defmodule PlanningPoker.Planning do
       ** (Ecto.NoResultsError)
 
   """
-  def get_table!(id), do: Repo.get!(Table, id)
+  def get_table!(id, lock \\ false) do
+    case lock do
+      true -> Repo.get!(Table, id, lock: "FOR UPDATE")
+      false -> Repo.get!(Table, id)
+    end
+  end
 
   @doc """
   Creates a table.
@@ -74,6 +82,41 @@ defmodule PlanningPoker.Planning do
   end
 
   @doc """
+  Add a user.
+
+  ## Examples
+
+      iex> update_table(table, %{field: new_value})
+      {:ok, %Table{}}
+
+      iex> update_table(table, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def add_user(%Table{} = table, attrs) do
+    get_table!(table.id, true)
+    |> Table.changeset(attrs)
+    |> Repo.update()
+  end
+
+  def find_user(%{"id" => id, "user_key" => user_key}) do
+    case Ecto.Adapters.SQL.query(PlanningPoker.Repo, "SELECT t0.id, users.id  FROM tables AS t0, jsonb_to_recordset(t0.users) as users(id text) WHERE (t0.id = #{id}) AND users.id = '#{user_key}'", []) do
+      {:ok, result} -> length(result.rows) > 0
+      {:error, _} -> false
+    end
+  end
+
+  def delete_user(%{"id" => id, "user_key" => user_key}) do
+    table = get_table!(id, true)
+    attrs = Enum.filter(table.users, fn user -> user.id != user_key end)
+
+    Table.changeset(table, %{users: attrs})
+      |> Repo.update()
+  end
+
+
+
+  @doc """
   Deletes a table.
 
   ## Examples
@@ -101,4 +144,23 @@ defmodule PlanningPoker.Planning do
   def change_table(%Table{} = table, attrs \\ %{}) do
     Table.changeset(table, attrs)
   end
+
+  def show_vote!(id) do
+    id
+    |> get_table!
+    |> update_table(%{show_vote: true})
+  end
+
+  def reset_vote!(id) do
+    table = id
+    |> get_table!
+
+    users = Enum.map(table.users, fn %User{vote: _}=user ->
+      %User{user| vote: nil}
+    end)
+
+    table
+    |> update_table(%{users: users, show_vote: false})
+  end
+
 end
