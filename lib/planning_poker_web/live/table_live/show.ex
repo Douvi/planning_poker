@@ -6,8 +6,15 @@ defmodule PlanningPokerWeb.TableLive.Show do
   alias PlanningPoker.Planning
 
   @impl true
-  def mount(_params, %{"_csrf_token" => key}, socket) do
+  def mount(%{"id" => id}, %{"_csrf_token" => key}, socket) do
+    if connected?(socket), do: Planning.subscribe(id)
+
     {:ok, socket |> assign(:user_key, key)}
+  end
+
+  @impl true
+  def handle_info({:table_updated, table}, socket) do
+    {:noreply, socket |> assign(:table, table)}
   end
 
   @impl true
@@ -52,11 +59,12 @@ defmodule PlanningPokerWeb.TableLive.Show do
      |> assign(:table, Planning.get_table!(id))
   end
 
-  defp apply_event(socket, "apply_vote", %{"id" => id}) do
-    # TODO APPLY VOTE
+  defp apply_event(socket, "apply_vote", %{"id" => new_vote}) do
+    table_id = socket.assigns.table.id
+    Planning.apply_vote!(table_id, socket.assigns.user_key, new_vote)
 
     socket
-     |> assign(:table, Planning.get_table!(id))
+     |> assign(:table, Planning.get_table!(table_id))
   end
 
   defp page_title(:show), do: "Show Table"
@@ -69,10 +77,12 @@ defmodule PlanningPokerWeb.TableLive.Show do
 
   @impl true
   def terminate(reason, socket) do
+    Logger.info("@@@@@@@@@@@@ terminate -> #{inspect(reason)}")
     case reason do
       {:shutdown, :closed} ->
         Planning.delete_user(%{"id" => socket.assigns.table.id, "user_key" => socket.assigns.user_key})
+        reason
+      _ -> reason
     end
-    reason
   end
 end

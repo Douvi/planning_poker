@@ -21,7 +21,7 @@ defmodule PlanningPoker.Planning do
 
   """
   def list_tables do
-    Repo.all(Table)
+    Repo.all(from t in Table, order_by: [desc: t.id])
   end
 
   @doc """
@@ -61,6 +61,7 @@ defmodule PlanningPoker.Planning do
     %Table{}
     |> Table.changeset(attrs)
     |> Repo.insert()
+    |> broadcast(:table_created)
   end
 
   @doc """
@@ -79,6 +80,7 @@ defmodule PlanningPoker.Planning do
     table
     |> Table.changeset(attrs)
     |> Repo.update()
+    |> broadcast(:table_updated)
   end
 
   @doc """
@@ -95,8 +97,7 @@ defmodule PlanningPoker.Planning do
   """
   def add_user(%Table{} = table, attrs) do
     get_table!(table.id, true)
-    |> Table.changeset(attrs)
-    |> Repo.update()
+    |> update_table(attrs)
   end
 
   def find_user(%{"id" => id, "user_key" => user_key}) do
@@ -110,8 +111,7 @@ defmodule PlanningPoker.Planning do
     table = get_table!(id, true)
     attrs = Enum.filter(table.users, fn user -> user.id != user_key end)
 
-    Table.changeset(table, %{users: attrs})
-      |> Repo.update()
+    update_table(table, %{users: attrs})
   end
 
 
@@ -147,13 +147,13 @@ defmodule PlanningPoker.Planning do
 
   def show_vote!(id) do
     id
-    |> get_table!
+    |> get_table!(true)
     |> update_table(%{show_vote: true})
   end
 
   def reset_vote!(id) do
     table = id
-    |> get_table!
+    |> get_table!(true)
 
     users = Enum.map(table.users, fn %User{vote: _}=user ->
       %User{user| vote: nil}
@@ -161,6 +161,36 @@ defmodule PlanningPoker.Planning do
 
     table
     |> update_table(%{users: users, show_vote: false})
+  end
+
+  def apply_vote!(id, user_key, new_vote) do
+    table = id
+    |> get_table!(true)
+
+    users = Enum.map(table.users, fn %User{id: id}=user ->
+      if id == user_key do
+        %User{user| vote: new_vote}
+      else
+        user
+      end
+    end)
+
+    table
+    |> update_table(%{users: users})
+  end
+
+  def subscribe(table_id) do
+    Phoenix.PubSub.subscribe(PlanningPoker.PubSub, "table_#{table_id}")
+  end
+  def subscribe() do
+    Phoenix.PubSub.subscribe(PlanningPoker.PubSub, "tables")
+  end
+
+  defp broadcast({:error, _reason} = error, _event), do: error
+  defp broadcast({:ok, table}, event) do
+    Phoenix.PubSub.broadcast(PlanningPoker.PubSub, "table_#{table.id}", {event, table})
+    Phoenix.PubSub.broadcast(PlanningPoker.PubSub, "tables", {event, table})
+    {:ok, table}
   end
 
 end

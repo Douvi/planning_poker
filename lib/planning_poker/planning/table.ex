@@ -22,16 +22,12 @@ defmodule PlanningPoker.Planning.Table do
         []
       end
 
-    Logger.info("start attrs -> #{inspect(attrs)}")
-
     attrs = case attrs do
      %{"id" => id, "user_name" => user_name} -> %{users: old_users ++ [User.to_map(%{"id" => id,"user_name" => user_name})]}
      %{users: []} -> %{users: []}
      %{users: users} = attrs  -> %{attrs | users: Enum.map(users, fn user -> User.to_map(user) end)}
      _ -> attrs
     end
-
-    Logger.info("end attrs -> #{inspect(attrs)}")
 
     table
     |> cast(attrs, [:table_name, :code, :show_vote])

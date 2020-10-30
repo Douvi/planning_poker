@@ -7,10 +7,20 @@ defmodule PlanningPokerWeb.TableLive.Index do
   alias PlanningPoker.Planning.Table
 
   @impl true
-  def mount(_params, %{"_csrf_token" => key}, socket) do
-    {:ok, socket
-      |> assign(:user_key, key)
-      |> assign(:tables, list_tables())}
+  def mount(_params, _session, socket) do
+    if connected?(socket), do: Planning.subscribe()
+
+    {:ok, socket |> assign(:tables, list_tables())}
+  end
+
+  # @impl true
+  # def handle_info({:table_updated, table}, socket) do
+  #   {:noreply, socket |> assign(:table, table)}
+  # end
+
+  @impl true
+  def handle_info({:table_created, table}, socket) do
+    {:noreply, update(socket, :tables, fn tables -> [table | tables] end)}
   end
 
   @impl true

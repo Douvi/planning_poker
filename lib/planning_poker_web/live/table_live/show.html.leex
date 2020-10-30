@@ -36,9 +36,9 @@
       <th>Users</th>
       <td style="text-align:right">
           <%= if @table.show_vote === false do %>
-            <span><%= link "Show Vote", to: Routes.table_show_path(@socket, :show, @table), phx_click: "show_vote", phx_value_id: @table.id, class: "button" %> </span>
+            <span><%= live_patch "Show Vote", to: Routes.table_show_path(@socket, :show, @table), phx_click: "show_vote", phx_value_id: @table.id, class: "button" %> </span>
           <% end %>
-          <span><%= link "Reset Vote", to: Routes.table_show_path(@socket, :show, @table), phx_click: "reset_vote", phx_value_id: @table.id %></span>
+          <span><%= live_patch "Reset Vote", to: Routes.table_show_path(@socket, :show, @table), phx_click: "reset_vote", phx_value_id: @table.id %></span>
         </td>
       <th></th>
     </tr>
@@ -67,6 +67,6 @@
 
 <ul id="menu">
   <%= for x <- [0,1,2,3,5,8,13,21] do %>
-  <li><%= link x, to: Routes.table_show_path(@socket, :show, @table), phx_click: "apply_vote", phx_value_id: @table.id, class: "button" %></li>
+  <li><%= live_patch x, to: Routes.table_show_path(@socket, :show, @table), phx_click: "apply_vote", phx_value_id: x, class: "button" %></li>
   <% end %>
 </ul>

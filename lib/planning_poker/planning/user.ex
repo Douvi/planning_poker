@@ -13,7 +13,7 @@ defmodule PlanningPoker.Planning.User do
   @doc false
   def changeset(table, attrs) do
     table
-    |> cast(attrs, [:user_name, :id])
+    |> cast(attrs, [:user_name, :id, :vote])
     |> validate_required([:user_name, :id])
   end
 
