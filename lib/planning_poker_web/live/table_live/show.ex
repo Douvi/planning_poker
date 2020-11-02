@@ -6,11 +6,15 @@ defmodule PlanningPokerWeb.TableLive.Show do
   alias PlanningPoker.Planning
 
   @impl true
-  def mount(%{"id" => id}, %{"_csrf_token" => key}, socket) do
-    Logger.info("@@@@@@@@@@@@ mount -- user_key -> #{inspect(key)}")
+  def mount(%{"id" => id}, session, socket) do
     if connected?(socket), do: Planning.subscribe(id)
 
-    {:ok, socket |> assign(:user_key, key)}
+    socket = case session do
+      %{"_csrf_token" => key} -> socket |> assign(:user_key, key)
+      _ -> socket |> redirect(to: Routes.table_index_path(socket, :index))
+    end
+
+    {:ok, socket}
   end
 
   @impl true
