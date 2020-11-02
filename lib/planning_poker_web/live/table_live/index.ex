@@ -13,14 +13,24 @@ defmodule PlanningPokerWeb.TableLive.Index do
     {:ok, socket |> assign(:tables, list_tables())}
   end
 
-  # @impl true
-  # def handle_info({:table_updated, table}, socket) do
-  #   {:noreply, socket |> assign(:table, table)}
-  # end
-
   @impl true
   def handle_info({:table_created, table}, socket) do
     {:noreply, update(socket, :tables, fn tables -> [table | tables] end)}
+  end
+
+  @impl true
+  def handle_info({:table_updated, table}, socket) do
+    {:noreply, update(socket, :tables,
+    fn tables -> Enum.map(tables,
+      fn t ->
+        if table.id === t.id do
+          table
+        else
+          t
+        end
+      end)
+    end)
+  }
   end
 
   @impl true

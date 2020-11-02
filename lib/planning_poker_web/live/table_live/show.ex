@@ -7,6 +7,7 @@ defmodule PlanningPokerWeb.TableLive.Show do
 
   @impl true
   def mount(%{"id" => id}, %{"_csrf_token" => key}, socket) do
+    Logger.info("@@@@@@@@@@@@ mount -- user_key -> #{inspect(key)}")
     if connected?(socket), do: Planning.subscribe(id)
 
     {:ok, socket |> assign(:user_key, key)}
@@ -77,7 +78,7 @@ defmodule PlanningPokerWeb.TableLive.Show do
 
   @impl true
   def terminate(reason, socket) do
-    Logger.info("@@@@@@@@@@@@ terminate -> #{inspect(reason)}")
+    Logger.info("@@@@@@@@@@@@ terminate -- user_key -> #{inspect(socket.assigns.user_key)} | reason -> #{inspect(reason)}")
     case reason do
       {:shutdown, :closed} ->
         Planning.delete_user(%{"id" => socket.assigns.table.id, "user_key" => socket.assigns.user_key})

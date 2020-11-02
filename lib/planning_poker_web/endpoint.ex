@@ -24,7 +24,7 @@ defmodule PlanningPokerWeb.Endpoint do
     at: "/",
     from: :planning_poker,
     gzip: false,
-    only: ~w(css fonts images js favicon.ico robots.txt)
+    only: ~w(css fonts images js favicon.ico favicon-32x32.png favicon-16x16.png robots.txt)
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.

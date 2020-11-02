@@ -103,3 +103,30 @@
 ul#menu li {
     display: inline;
 }
+
+#bar_1 {
+    animation: bar_1 2s ease-in-out infinite alternate;
+    animation-delay: 100ms;
+    transform-origin: left;
+}
+
+#bar_2 {
+    animation: bar_1 1.8s ease-in-out infinite alternate;
+    animation-delay: 300ms;
+    transform-origin: left;
+}
+
+#bar_3 {
+    animation: bar_1 1.6s ease-in-out infinite alternate;
+    animation-delay: 600ms;
+    transform-origin: left;
+}
+
+@keyframes bar_1 {
+    from {
+        transform: rotateY(0deg);
+    }
+    to {
+        transform: rotateY(40deg);
+    }
+}
