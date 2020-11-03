@@ -39,10 +39,13 @@ defmodule PlanningPoker.Planning do
 
   """
   def get_table!(id, lock \\ false) do
-    case lock do
+    table = case lock do
       true -> Repo.get!(Table, id, lock: "FOR UPDATE")
       false -> Repo.get!(Table, id)
     end
+    list = Enum.sort_by(table.users, &(&1.inserted_at))
+
+    %Table{table | users: list}
   end
 
   @doc """
@@ -108,7 +111,8 @@ defmodule PlanningPoker.Planning do
           case PlanningPoker.TablesStack.pop(%{table_id: id, user_key: user_key}) do
             [] -> false
             [header | _tail] ->
-              get_table!(id, true) |> update_table(%{users: [header.user]})
+              table = get_table!(id, true)
+              update_table(table, %{users: [header.user | table.users]})
               true
           end
         else
