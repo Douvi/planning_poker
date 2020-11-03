@@ -102,14 +102,33 @@ defmodule PlanningPoker.Planning do
 
   def find_user(%{"id" => id, "user_key" => user_key}) do
     case Ecto.Adapters.SQL.query(PlanningPoker.Repo, "SELECT t0.id, users.id  FROM tables AS t0, jsonb_to_recordset(t0.users) as users(id text) WHERE (t0.id = #{id}) AND users.id = '#{user_key}'", []) do
-      {:ok, result} -> length(result.rows) > 0
+      {:ok, result} ->
+        if length(result.rows) == 0 do
+          # let double check if user not into a GenServer
+          case PlanningPoker.TablesStack.pop(%{table_id: id, user_key: user_key}) do
+            [] -> false
+            [header | _tail] ->
+              get_table!(id, true) |> update_table(%{users: [header.user]})
+              true
+          end
+        else
+          # this mean length(result.rows) > 0
+          true
+        end
       {:error, _} -> false
     end
   end
 
   def delete_user(%{"id" => id, "user_key" => user_key}) do
     table = get_table!(id, true)
-    attrs = Enum.filter(table.users, fn user -> user.id != user_key end)
+    attrs = Enum.filter(table.users, fn user ->
+      if user.id == user_key do
+        PlanningPoker.TablesStack.push(%{table_id: id, user: user})
+        false
+      else
+        true
+      end
+    end)
 
     update_table(table, %{users: attrs})
   end
