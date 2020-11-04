@@ -66,7 +66,7 @@
 </table>
 
 <ul id="menu" style="text-align:center">
-  <%= for x <- [0,1,2,3,5,8,13,21] do %>
+  <%= for x <- String.split(@table.voting_rule, ",") do %>
   <li><%= live_patch x, to: Routes.table_show_path(@socket, :show, @table), phx_click: "apply_vote", phx_value_id: x, class: "button" %></li>
   <% end %>
 </ul>

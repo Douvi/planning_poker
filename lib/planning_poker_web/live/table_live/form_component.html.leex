@@ -14,6 +14,10 @@
     <%= label f, :table_name %>
     <%= text_input f, :table_name %>
     <%= error_tag f, :table_name %>
+
+    <%= label f, :voting_rule %>
+    <%= text_input f, :voting_rule, placeholder: "0, 1, 2, 3, 5, 8, 13, 21" %>
+    <%= error_tag f, :voting_rule %>
   <% end %>
   <%= submit "Save", phx_disable_with: "Saving..." %>
 </form>
