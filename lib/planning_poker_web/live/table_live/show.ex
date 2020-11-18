@@ -45,6 +45,12 @@ defmodule PlanningPokerWeb.TableLive.Show do
     |> assign(:table, Planning.get_table!(id))
   end
 
+  defp apply_action(socket, :countdown, %{"id" => id}) do
+    socket
+    |> assign(:page_title, page_title(socket.assigns.live_action))
+    |> assign(:table, Planning.get_table!(id))
+  end
+
   @impl true
   def handle_event(event, param, socket) do
     {:noreply, apply_event(socket, event, param)}
@@ -75,6 +81,7 @@ defmodule PlanningPokerWeb.TableLive.Show do
   defp page_title(:show), do: "Show Table"
   defp page_title(:edit), do: "Edit Table"
   defp page_title(:join), do: "Join Tables"
+  defp page_title(:countdown), do: "Countdown"
 
   def is_not_join!(%{"id" => id, "user_key" => user_key}) do
     !Planning.find_user(%{"id" => id, "user_key" => user_key})

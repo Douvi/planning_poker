@@ -25,6 +25,7 @@ defmodule PlanningPokerWeb.Router do
 
     live "/tables/:id", TableLive.Show, :show
     live "/tables/:id/join", TableLive.Show, :join
+    live "/tables/:id/countdown", TableLive.Show, :countdown
     live "/tables/:id/show/edit", TableLive.Show, :edit
   end
 

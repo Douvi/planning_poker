@@ -10,7 +10,7 @@ defmodule PlanningPoker.Planning.Table do
     field :code, :string
     field :show_vote, :boolean, default: false
     field :voting_rule, :string, default: "0, 1, 2, 3, 5, 8, 13, 21"
-    field :countdown, :integer, default: 0
+    field :countdown, :integer, default: 30
     embeds_many :users, User, on_replace: :delete
     timestamps()
   end

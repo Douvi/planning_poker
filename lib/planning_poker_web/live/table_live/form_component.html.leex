@@ -7,7 +7,7 @@
   phx_submit: "save" %>
 
   <%= if @action == :join do %>
-    <%= label f, "user name" %>
+    <%= label f, :user_name %>
     <%= text_input f, :user_name %>
     <%= error_tag f, :user_name %>
   <% else %>
@@ -18,6 +18,10 @@
     <%= label f, :voting_rule %>
     <%= text_input f, :voting_rule, placeholder: "0, 1, 2, 3, 5, 8, 13, 21" %>
     <%= error_tag f, :voting_rule %>
+
+    <%= label f, "Countdown (in seconds)" %>
+    <%= text_input f, :countdown, placeholder: "30 seconds" %>
+    <%= error_tag f, :countdown %>
   <% end %>
   <%= submit "Save", phx_disable_with: "Saving..." %>
 </form>

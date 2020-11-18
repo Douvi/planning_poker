@@ -122,11 +122,65 @@ ul#menu li {
     transform-origin: left;
 }
 
+#ellipse_outside {
+    animation: ellipse 1.8s ease-in-out infinite alternate;
+    transform-origin: center;
+}
+
+#bubble_right {
+    animation: bubble 0.8s ease-in-out infinite alternate;
+    transform-origin: center;
+}
+
+#bubble_center {
+    animation: bubble 0.8s ease-in-out infinite alternate;
+    transform-origin: center;
+    animation-delay: 200ms;
+}
+
+#bubble_left {
+    animation: bubble 0.8s ease-in-out infinite alternate;
+    transform-origin: center;
+    animation-delay: 400ms;
+}
+
+#check {
+    animation: check 0.8s ease-in-out infinite alternate;
+    transform-origin: center;
+}
+
 @keyframes bar_1 {
     from {
         transform: rotateY(0deg);
     }
     to {
         transform: rotateY(40deg);
+    }
+}
+
+@keyframes bubble {
+    0% {
+        transform: translateY(-5%);
+    }
+    100% {
+        transform: translateY(5%);
+    }
+}
+
+@keyframes check {
+    0% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes ellipse {
+    0% {
+        transform: scale(0.9);
+    }
+    100% {
+        transform: scale(1);
     }
 }
