@@ -4,6 +4,7 @@ defmodule PlanningPokerWeb.TableLive.Show do
   use PlanningPokerWeb, :live_view
 
   alias PlanningPoker.Planning
+  use Timex
 
   @impl true
   def mount(%{"id" => id}, session, socket) do
@@ -14,12 +15,17 @@ defmodule PlanningPokerWeb.TableLive.Show do
       _ -> socket |> redirect(to: Routes.table_index_path(socket, :index))
     end
 
-    {:ok, socket}
+    {:ok, socket |> update_model(Planning.get_table!(id))}
   end
 
   @impl true
   def handle_info({:table_updated, table}, socket) do
-    {:noreply, socket |> assign(:table, table)}
+    {:noreply, socket |> update_model(table)}
+  end
+
+  @impl true
+  def handle_info(:tick, socket) do
+    {:noreply, update_model(socket, socket.assigns.table)}
   end
 
   @impl true
@@ -30,24 +36,21 @@ defmodule PlanningPokerWeb.TableLive.Show do
   defp apply_action(socket, :show, %{"id" => id}) do
     socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
+     |> assign(:timer, 0)
      |> assign(:table, Planning.get_table!(id))
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
     socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
+     |> assign(:timer, 0)
      |> assign(:table, Planning.get_table!(id))
   end
 
   defp apply_action(socket, :join, %{"id" => id}) do
     socket
     |> assign(:page_title, page_title(socket.assigns.live_action))
-    |> assign(:table, Planning.get_table!(id))
-  end
-
-  defp apply_action(socket, :countdown, %{"id" => id}) do
-    socket
-    |> assign(:page_title, page_title(socket.assigns.live_action))
+    |> assign(:timer, 0)
     |> assign(:table, Planning.get_table!(id))
   end
 
@@ -70,6 +73,25 @@ defmodule PlanningPokerWeb.TableLive.Show do
      |> assign(:table, Planning.get_table!(id))
   end
 
+  defp apply_event(socket, "start_countdown", %{"id" => id}) do
+    Planning.start_countdown!(id)
+
+    socket
+    |> assign(:table, Planning.get_table!(id))
+  end
+
+  defp apply_event(socket, "stop_countdown", %{"id" => id}) do
+    if socket.assigns[:tref] != nil do
+      :timer.cancel(socket.assigns.tref)
+    end
+
+    Planning.stop_countdown!(id)
+
+    socket
+      |> assign(:tref, nil)
+      |> assign(:table, Planning.get_table!(id))
+  end
+
   defp apply_event(socket, "apply_vote", %{"id" => new_vote}) do
     table_id = socket.assigns.table.id
     Planning.apply_vote!(table_id, socket.assigns.user_key, new_vote)
@@ -81,7 +103,6 @@ defmodule PlanningPokerWeb.TableLive.Show do
   defp page_title(:show), do: "Show Table"
   defp page_title(:edit), do: "Edit Table"
   defp page_title(:join), do: "Join Tables"
-  defp page_title(:countdown), do: "Countdown"
 
   def is_not_join!(%{"id" => id, "user_key" => user_key}) do
     !Planning.find_user(%{"id" => id, "user_key" => user_key})
@@ -95,6 +116,41 @@ defmodule PlanningPokerWeb.TableLive.Show do
         Planning.delete_user(%{"id" => socket.assigns.table.id, "user_key" => socket.assigns.user_key})
         reason
       _ -> reason
+    end
+  end
+
+  defp update_model(socket, table) do
+    Logger.info("update_model -> #{inspect(table)}")
+
+    cond do
+      table.countdown_ending != nil ->
+        Logger.debug("into table.countdown_ending != nil -> now: #{DateTime.utc_now} | end: #{table.countdown_ending}")
+        timer =
+          DateTime.diff(table.countdown_ending, DateTime.utc_now, :second)
+          |> max(0)
+
+        cond do
+          timer == 0 and table.show_vote == false ->
+            Logger.debug("into timer == 0 ->")
+            if socket.assigns[:tref] != nil do
+              :timer.cancel(socket.assigns.tref)
+            end
+            Planning.show_vote!(table.id)
+            socket |> assign(:tref, nil) |> assign(:timer, timer) |> assign(:table, Planning.get_table!(table.id))
+
+          timer != 0 and socket.assigns[:tref] == nil ->
+            Logger.debug("into Map.has_key?(socket.assigns, :timer_end) == false ->")
+            {:ok, tref} = :timer.send_interval(900, self(), :tick)
+            socket |> assign(:tref, tref) |> assign(:timer, timer) |> assign(:table, table)
+
+          true ->
+            Logger.debug("into 1true ->")
+            socket |> assign(:timer, timer) |> assign(:table, table)
+
+        end
+      true ->
+        Logger.debug("into true ->")
+        socket |> assign(:table, table)
     end
   end
 end

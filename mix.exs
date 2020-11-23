@@ -19,7 +19,7 @@ defmodule PlanningPoker.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {PlanningPoker.Application, []},
+      mod: {PlanningPoker.Application, [:timex]},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -46,7 +46,8 @@ defmodule PlanningPoker.MixProject do
       {:telemetry_poller, "~> 0.4"},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
-      {:plug_cowboy, "~> 2.0"}
+      {:plug_cowboy, "~> 2.0"},
+      {:timex, "~> 3.6"}
     ]
   end
 

@@ -11,6 +11,7 @@ defmodule PlanningPoker.Planning.Table do
     field :show_vote, :boolean, default: false
     field :voting_rule, :string, default: "0, 1, 2, 3, 5, 8, 13, 21"
     field :countdown, :integer, default: 30
+    field :countdown_ending, :utc_datetime
     embeds_many :users, User, on_replace: :delete
     timestamps()
   end
@@ -32,7 +33,7 @@ defmodule PlanningPoker.Planning.Table do
     end
 
     table
-    |> cast(attrs, [:table_name, :code, :show_vote, :voting_rule, :countdown])
+    |> cast(attrs, [:table_name, :code, :show_vote, :voting_rule, :countdown, :countdown_ending])
     |> cast_embed(:users)
     |> validate_required([:table_name, :show_vote, :voting_rule])
   end

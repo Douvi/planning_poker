@@ -10,6 +10,7 @@ defmodule PlanningPoker.Planning do
 
   alias PlanningPoker.Planning.Table
   alias PlanningPoker.Planning.User
+  use Timex
 
   @doc """
   Returns the list of tables.
@@ -137,8 +138,6 @@ defmodule PlanningPoker.Planning do
     update_table(table, %{users: attrs})
   end
 
-
-
   @doc """
   Deletes a table.
 
@@ -183,7 +182,23 @@ defmodule PlanningPoker.Planning do
     end)
 
     table
-    |> update_table(%{users: users, show_vote: false})
+    |> update_table(%{users: users, show_vote: false, countdown_ending: nil})
+  end
+
+  def start_countdown!(id) do
+    table = id
+      |> get_table!(true)
+
+    table
+      |> update_table(%{countdown_ending: DateTime.add(DateTime.utc_now, table.countdown)})
+  end
+
+  def stop_countdown!(id) do
+    table = id
+      |> get_table!(true)
+
+    table
+      |> update_table(%{countdown_ending: nil})
   end
 
   def apply_vote!(id, user_key, new_vote) do

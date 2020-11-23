@@ -20,16 +20,6 @@
     return_to: Routes.table_show_path(@socket, :show, @table) %>
 <% end %>
 
-<%= if @live_action in [:countdown] do %>
-  <%= live_locked_modal @socket, PlanningPokerWeb.TableLive.FormComponent,
-    id: @table.id,
-    title: @page_title,
-    action: @live_action,
-    table: @table,
-    user_key: @user_key,
-    return_to: Routes.table_show_path(@socket, :show, @table) %>
-<% end %>
-
 <%# check if the user have to join again in case leave and back again %>
 <%= if PlanningPokerWeb.TableLive.Show.is_not_join! %{"id" => @table.id, "user_key" => @user_key} do %>
   <%= live_modal @socket, PlanningPokerWeb.TableLive.FormComponent,
@@ -46,23 +36,37 @@
     <tr>
       <th>Users</th>
       <th>
-        <%= if @table.countdown === 0 do %>
+        <%= cond do %>
           <%# If set countdown at 0 we will show the 2 buttons `Show Vote` and `Reset Vote` %>
+          <%= @table.countdown == 0 -> %>
+            <td style="text-align:right">
+              <%= if @table.show_vote === false do %>
+                <span><%= live_patch "Show Vote", to: Routes.table_show_path(@socket, :show, @table), phx_click: "show_vote", phx_value_id: @table.id, class: "button" %> </span>
+              <% end %>
+              &nbsp;
+              <span><%= live_patch "Reset Vote", to: Routes.table_show_path(@socket, :show, @table), phx_click: "reset_vote", phx_value_id: @table.id %></span>
+            </td>
+
+          <%# If the counter is  %>
+          <%= @timer > 0 -> %>
           <td style="text-align:right">
-            <%= if @table.show_vote === false do %>
-              <span><%= live_patch "Show Vote", to: Routes.table_show_path(@socket, :show, @table), phx_click: "show_vote", phx_value_id: @table.id, class: "button" %> </span>
-            <% end %>
-            <span><%= live_patch "Reset Vote", to: Routes.table_show_path(@socket, :show, @table), phx_click: "reset_vote", phx_value_id: @table.id %></span>
+            <%= @timer %> second(s)
+            &nbsp;
+            <span><%= live_patch "Stop", to: Routes.table_show_path(@socket, :show, @table), phx_click: "stop_countdown", phx_value_id: @table.id %></span>
           </td>
-        <% else %>
+
           <%# If set countdown > 0 we will show the 2 buttons `Start Vote` and `Reset Vote` %>
+          <%= true -> %>
           <td style="text-align:right">
             <%= if @table.show_vote === false do %>
-              <span><%= live_patch "Start Vote", to: Routes.table_show_path(@socket, :countdown, @table), class: "button" %> </span>
+              <span><%= live_patch "Start Countdown", to: Routes.table_show_path(@socket, :show, @table), phx_click: "start_countdown", phx_value_id: @table.id ,class: "button" %> </span>
             <% end %>
+            &nbsp;
             <span><%= live_patch "Reset Vote", to: Routes.table_show_path(@socket, :show, @table), phx_click: "reset_vote", phx_value_id: @table.id %></span>
           </td>
+
         <% end %>
+
       </th>
     </tr>
   </thead>
@@ -75,8 +79,8 @@
           <% @table.show_vote and user.vote === nil -> %>
             N/A
           <% @table.show_vote -> %>
-            vote: <%= user.vote %>
-          <% user.vote === nil -> %>
+            <%= user.vote %>
+          <% user.vote == nil && (@table.countdown == 0 || @timer > 0 || @table.show_vote == true) -> %>
             <svg width="6%" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
               <g id="waiting_vote">
                 <path id="ellipse_outside" opacity="0.2" d="M64.02 127.338C98.9288 127.338 127.228 99.0388 127.228 64.13C127.228 29.2212 98.9288 0.921997 64.02 0.921997C29.1112 0.921997 0.812012 29.2212 0.812012 64.13C0.812012 99.0388 29.1112 127.338 64.02 127.338Z" fill="#F9A826"/>
@@ -86,7 +90,7 @@
                 <circle id="bubble_left" cx="33" cy="64" r="8" fill="white"/>
               </g>
             </svg>
-          <% true -> %>
+          <% user.vote != nil -> %>
             <svg width="6%" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
               <g id="voted">
               <path id="ellipse_outside" opacity="0.2" d="M64.02 127.338C98.9288 127.338 127.228 99.0388 127.228 64.13C127.228 29.2212 98.9288 0.921997 64.02 0.921997C29.1112 0.921997 0.812012 29.2212 0.812012 64.13C0.812012 99.0388 29.1112 127.338 64.02 127.338Z" fill="#00BFA6"/>
@@ -94,6 +98,8 @@
               <path id="check" d="M51.084 88.89L33.147 65.829L43.578 57.716L52.07 68.635L80.759 38.351L90.353 47.439L51.084 88.89Z" fill="white"/>
               </g>
             </svg>
+          <% true -> %>
+            <%# SHOW NOTHING IN CASE DID NOT START VOTING %>
           <% end %>
         </td></th>
 
@@ -102,7 +108,7 @@
   </tbody>
 </table>
 
-<%= if @table.countdown === 0 do %>
+<%= if @table.countdown == 0 || @timer > 0 || @table.show_vote == true do %>
 <ul id="menu" style="text-align:center">
   <%= for x <- String.split(@table.voting_rule, ",") do %>
   <li><%= live_patch x, to: Routes.table_show_path(@socket, :show, @table), phx_click: "apply_vote", phx_value_id: x, class: "button" %></li>

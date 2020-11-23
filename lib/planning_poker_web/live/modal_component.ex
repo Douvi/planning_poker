@@ -13,7 +13,6 @@ defmodule PlanningPokerWeb.ModalComponent do
           phx-page-loading>
 
           <div class="phx-modal-content">
-            <%= live_patch raw("&times;"), to: @return_to, class: "phx-modal-close" %>
             <%= live_component @socket, @component, @opts %>
           </div>
         </div>
