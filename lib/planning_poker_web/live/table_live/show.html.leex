@@ -41,14 +41,14 @@
           <%= @table.countdown == 0 -> %>
             <td style="text-align:right">
               <%= if @table.show_vote === false do %>
-                <span><%= live_patch "Show Vote", to: Routes.table_show_path(@socket, :show, @table), phx_click: "show_vote", phx_value_id: @table.id, class: "button" %> </span>
+                <span><%= live_patch "Show", to: Routes.table_show_path(@socket, :show, @table), phx_click: "show_vote", phx_value_id: @table.id, class: "button" %> </span>
               <% end %>
               &nbsp;
-              <span><%= live_patch "Reset Vote", to: Routes.table_show_path(@socket, :show, @table), phx_click: "reset_vote", phx_value_id: @table.id %></span>
+              <span><%= live_patch "Reset", to: Routes.table_show_path(@socket, :show, @table), phx_click: "reset_vote", phx_value_id: @table.id %></span>
             </td>
 
           <%# If the counter is  %>
-          <%= @timer > 0 -> %>
+          <% @timer > 0 -> %>
           <td style="text-align:right">
             <%= @timer %> second(s)
             &nbsp;
@@ -56,13 +56,13 @@
           </td>
 
           <%# If set countdown > 0 we will show the 2 buttons `Start Vote` and `Reset Vote` %>
-          <%= true -> %>
+          <% true -> %>
           <td style="text-align:right">
             <%= if @table.show_vote === false do %>
-              <span><%= live_patch "Start Countdown", to: Routes.table_show_path(@socket, :show, @table), phx_click: "start_countdown", phx_value_id: @table.id ,class: "button" %> </span>
+              <span><%= live_patch "Start", to: Routes.table_show_path(@socket, :show, @table), phx_click: "start_countdown", phx_value_id: @table.id ,class: "button" %> </span>
             <% end %>
             &nbsp;
-            <span><%= live_patch "Reset Vote", to: Routes.table_show_path(@socket, :show, @table), phx_click: "reset_vote", phx_value_id: @table.id %></span>
+            <span><%= live_patch "Reset", to: Routes.table_show_path(@socket, :show, @table), phx_click: "reset_vote", phx_value_id: @table.id %></span>
           </td>
 
         <% end %>

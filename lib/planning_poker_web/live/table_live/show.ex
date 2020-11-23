@@ -148,7 +148,11 @@ defmodule PlanningPokerWeb.TableLive.Show do
 
       # else case
       true ->
-        socket |> assign(:table, table)
+        if socket.assigns[:tref] != nil do
+          :timer.cancel(socket.assigns.tref)
+        end
+
+        socket |> assign(:timer, 0) |> assign(:tref, nil) |> assign(:table, Planning.get_table!(table.id))
     end
   end
 end
