@@ -110,7 +110,6 @@ defmodule PlanningPokerWeb.TableLive.Show do
 
   @impl true
   def terminate(reason, socket) do
-    Logger.info("@@@@@@@@@@@@ terminate -- user_key -> #{inspect(socket.assigns.user_key)} | reason -> #{inspect(reason)}")
     case reason do
       {:shutdown, :closed} ->
         Planning.delete_user(%{"id" => socket.assigns.table.id, "user_key" => socket.assigns.user_key})
@@ -120,36 +119,35 @@ defmodule PlanningPokerWeb.TableLive.Show do
   end
 
   defp update_model(socket, table) do
-    Logger.info("update_model -> #{inspect(table)}")
-
     cond do
+      # We are in middle of a countdown
       table.countdown_ending != nil ->
-        Logger.debug("into table.countdown_ending != nil -> now: #{DateTime.utc_now} | end: #{table.countdown_ending}")
         timer =
           DateTime.diff(table.countdown_ending, DateTime.utc_now, :second)
           |> max(0)
 
         cond do
+          # Time over - we need to clean the value
           timer == 0 and table.show_vote == false ->
-            Logger.debug("into timer == 0 ->")
             if socket.assigns[:tref] != nil do
               :timer.cancel(socket.assigns.tref)
             end
             Planning.show_vote!(table.id)
             socket |> assign(:tref, nil) |> assign(:timer, timer) |> assign(:table, Planning.get_table!(table.id))
 
+          # Time not over over, check interval been call
           timer != 0 and socket.assigns[:tref] == nil ->
-            Logger.debug("into Map.has_key?(socket.assigns, :timer_end) == false ->")
             {:ok, tref} = :timer.send_interval(900, self(), :tick)
             socket |> assign(:tref, tref) |> assign(:timer, timer) |> assign(:table, table)
 
+          # else case
           true ->
-            Logger.debug("into 1true ->")
             socket |> assign(:timer, timer) |> assign(:table, table)
 
         end
+
+      # else case
       true ->
-        Logger.debug("into true ->")
         socket |> assign(:table, table)
     end
   end

@@ -1,7 +1,7 @@
 <table>
   <thead>
     <tr>
-      <th><h1> Poker Planning: <%= @table.table_name %> </h1></th>
+      <th><h1><%= @table.table_name %> </h1></th>
       <td style="text-align:right">
           <div style="text-align:right"> <span><%= live_patch "Edit", to: Routes.table_show_path(@socket, :edit, @table) %></span> </div>
       </td>
