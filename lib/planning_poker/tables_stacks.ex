@@ -15,6 +15,10 @@ defmodule PlanningPoker.TablesStack do
     GenServer.call(__MODULE__, {:pop, %{table_id: id, user_key: user_key}})
   end
 
+  def find(%{table_id: id, user_key: user_key}) do
+    GenServer.call(__MODULE__, {:find, %{table_id: id, user_key: user_key}})
+  end
+
   # Server (callbacks)
   @impl true
   def init(stack) do
@@ -26,6 +30,15 @@ defmodule PlanningPoker.TablesStack do
     newState = Enum.filter(state, fn e -> e.table_id != id and e.user.id != user_key end)
     element = Enum.filter(state, fn e -> e.table_id == id and e.user.id == user_key end)
     {:reply, element, newState}
+  end
+
+  @impl true
+  def handle_call({:find, %{table_id: id, user_key: user_key}} = param, _from, state) do
+    IO.puts("find -> param : #{inspect(param)}")
+    IO.puts("find -> state : #{inspect(state)}")
+    element = Enum.filter(state, fn e -> e.table_id == id and e.user.id == user_key end)
+    IO.puts("find -> element : #{inspect(element)}")
+    {:reply, element, state}
   end
 
   @impl true

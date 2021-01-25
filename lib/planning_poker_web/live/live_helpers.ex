@@ -21,9 +21,4 @@ defmodule PlanningPokerWeb.LiveHelpers do
     live_component(socket, PlanningPokerWeb.ModalComponent, modal_opts)
   end
 
-  def live_locked_modal(socket, component, opts) do
-    path = Keyword.fetch!(opts, :return_to)
-    modal_opts = [id: :modal_locked, return_to: path, component: component, opts: opts]
-    live_component(socket, PlanningPokerWeb.ModalComponent, modal_opts)
-  end
 end

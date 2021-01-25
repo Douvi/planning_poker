@@ -104,6 +104,26 @@ defmodule PlanningPoker.Planning do
     |> update_table(attrs)
   end
 
+  def get_user!(%{"id" => id, "user_key" => user_key}) do
+    case Ecto.Adapters.SQL.query(PlanningPoker.Repo, "SELECT users.id, users.user_name, users.is_guest  FROM tables AS t0, jsonb_to_recordset(t0.users) as users(id text, user_name text, is_guest boolean) WHERE (t0.id = #{id}) AND users.id = '#{user_key}'", []) do
+      {:ok, result} ->
+        case result_to_maps(result) do
+          [] ->
+            case PlanningPoker.TablesStack.find(%{table_id: id, user_key: user_key}) do
+              [] -> %User{}
+              [head | _tail] -> head
+            end
+          [head | _tail] ->
+            head
+        end
+      {:error, _} -> false
+    end
+  end
+
+  defp result_to_maps(%Postgrex.Result{columns: _, rows: nil}), do: []
+
+  defp result_to_maps(%Postgrex.Result{columns: col_nms, rows: rows}), do: Enum.map(rows, &Repo.load(User, {col_nms, &1}))
+
   def find_user(%{"id" => id, "user_key" => user_key}) do
     case Ecto.Adapters.SQL.query(PlanningPoker.Repo, "SELECT t0.id, users.id  FROM tables AS t0, jsonb_to_recordset(t0.users) as users(id text) WHERE (t0.id = #{id}) AND users.id = '#{user_key}'", []) do
       {:ok, result} ->
@@ -213,8 +233,17 @@ defmodule PlanningPoker.Planning do
       end
     end)
 
+    show_vote = Enum.all?(users, fn %User{vote: vote} -> vote != nil end)
+
+    countdown_ending = if show_vote do
+      nil
+    else
+      table.countdown_ending
+    end
+
+
     table
-    |> update_table(%{users: users})
+    |> update_table(%{users: users, show_vote: show_vote, countdown_ending: countdown_ending})
   end
 
   def subscribe(table_id) do

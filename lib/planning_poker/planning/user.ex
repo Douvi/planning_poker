@@ -7,17 +7,18 @@ defmodule PlanningPoker.Planning.User do
     field :id
     field :user_name
     field :vote
+    field :is_guest, :boolean, default: false
     timestamps()
   end
 
   @doc false
   def changeset(table, attrs) do
     table
-    |> cast(attrs, [:user_name, :id, :vote])
+    |> cast(attrs, [:user_name, :id, :vote, :is_guest])
     |> validate_required([:user_name, :id])
   end
 
   def to_map(%{"id" => id, "user_name" => user_name}), do: %{id: id, user_name: user_name}
-  def to_map(user), do: %{id: user.id, inserted_at: user.inserted_at, updated_at: user.updated_at, user_name: user.user_name, vote: user.vote}
+  def to_map(user), do: %{id: user.id, inserted_at: user.inserted_at, updated_at: user.updated_at, user_name: user.user_name, vote: user.vote, is_guest: user.is_guest}
 
 end

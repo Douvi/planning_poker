@@ -21,11 +21,10 @@ defmodule PlanningPokerWeb.Router do
 
     live "/tables", TableLive.Index, :index
     live "/tables/new", TableLive.Index, :new
-    live "/tables/:id/edit", TableLive.Index, :edit
 
     live "/tables/:id", TableLive.Show, :show
     live "/tables/:id/join", TableLive.Show, :join
-    live "/tables/:id/show/edit", TableLive.Show, :edit
+    live "/tables/:id/edit", TableLive.Show, :edit
   end
 
   # Other scopes may use custom stacks.

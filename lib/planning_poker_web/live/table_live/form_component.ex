@@ -9,15 +9,18 @@ defmodule PlanningPokerWeb.TableLive.FormComponent do
   @impl true
   def update(%{table: table} = assigns, socket) do
     changeset = Planning.change_table(table)
+    IO.inspect("handle_event ->> update -> #{inspect(assigns)}")
 
     {:ok,
      socket
      |> assign(assigns)
-     |> assign(:changeset, changeset)}
+     |> assign(:changeset, changeset)
+    }
   end
 
   @impl true
   def handle_event("validate", %{"table" => table_params}, socket) do
+    IO.inspect("handle_event ->> validate -> #{inspect(table_params)}")
     changeset =
       socket.assigns.table
       |> Planning.change_table(table_params)
@@ -30,7 +33,8 @@ defmodule PlanningPokerWeb.TableLive.FormComponent do
     save_table(socket, socket.assigns.action, param)
   end
 
-  defp save_table(socket, :edit, %{"table" => table_params}) do
+  defp save_table(socket, :edit, %{"table" => table_params} = param) do
+    IO.inspect("table_params -> #{inspect(param)}")
     case Planning.update_table(socket.assigns.table, table_params) do
       {:ok, _table} ->
         {:noreply,

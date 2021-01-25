@@ -49,9 +49,9 @@ defmodule PlanningPokerWeb.TableLive.Show do
 
   defp apply_action(socket, :join, %{"id" => id}) do
     socket
-    |> assign(:page_title, page_title(socket.assigns.live_action))
-    |> assign(:timer, 0)
-    |> assign(:table, Planning.get_table!(id))
+      |> assign(:page_title, page_title(socket.assigns.live_action))
+      |> assign(:timer, 0)
+      |> assign(:table, Planning.get_table!(id))
   end
 
   @impl true

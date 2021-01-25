@@ -22,6 +22,24 @@
     <%= label f, "Countdown (in seconds)" %>
     <%= text_input f, :countdown, placeholder: "30 seconds" %>
     <%= error_tag f, :countdown %>
+
+    <%= inputs_for f, :users, fn fp -> %>
+      <% IO.inspect(fp) %>>
+      <%= if fp.data.id == @user_key do %>
+        <h2>Profile</h2>
+
+        <%= label fp, :user_name %>
+        <%= text_input fp, :user_name %>
+        <%= error_tag fp, :user_name %>
+
+        <%= label fp, "Guest" %>
+        <%= checkbox fp, :is_guest %>
+        <%= error_tag fp, :is_guest %>
+
+        <br/>
+      <% end %>
+    <% end %>
+
   <% end %>
   <%= submit "Save", phx_disable_with: "Saving..." %>
 </form>
